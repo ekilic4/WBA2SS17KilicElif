@@ -1,0 +1,24 @@
+// Module einbinden
+var express = require('express');
+var router = express.Router();
+// für Zugriff an Objekte binden.
+var app = express();
+
+//Konstante zur Konfiguration
+var settings = {
+    port: 3000
+};
+
+//binden des Pfades an eine Variable
+const products = require('./routes/products'); 
+
+//einbinden der Pfade.
+app.use('/products',products);
+
+app.get("/",function(req,res){
+   res.send("Hello World").end();
+});
+
+app.listen(settings.port, function(){
+    console.log("Express app läuft auf Port "+settings.port);
+});
