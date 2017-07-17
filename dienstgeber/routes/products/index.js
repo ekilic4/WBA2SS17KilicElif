@@ -36,10 +36,14 @@ return productList;
 
 function readProducts(){
     var products = fs.readFileSync('routes/products/json/products.json').toString(); // liest die Datei synchron aus. (konvertiert zum String)
-    if(products.length < 0 ){
+    if(products.length < 1 ){
         products = []; // wenn keine Produkte in der Liste sein sollte, wird ein leeres Objekt bzw Array ausgegeben.
+        return products;
     }
-    return JSON.parse(products);
+    else{
+        return JSON.parse(products);
+    }
+    
 }
 
 function compareProducts(compareID){
@@ -58,34 +62,28 @@ function compareProducts(compareID){
 router.get('/',function(req,res){
     if(fs.existsSync('routes/products/json/products.json')){
         var productList = readProducts(); // liest die Produkte aus der Datei aus.
+        
+        if(productList.length > 0){   // Falls die Produktliste gefüllt ist, soll diese ausgegeben werden
         res.status(200).send(productList); // Gibt die Produkte aus.
-       }
-    else{
-        res.status(404).send("Es wurden keine Produkte gefunden.");
-    }
-     
-});
-
-// Die Ressource init dient dazu, beim ersten Start der Anwendung die Daten der API zu beziehen, um im weiteren Verlauf der
-// Anwendung mit diesen arbeiten zu können. --((products/init))--
-router.get('/init',function(req,res){
-    if(fs.existsSync('routes/products/json/products.json')){ // Falls die JSON Datei schon existiert.
+        }
         
-        res.status(400).send("Es befinden sich bereits Daten in der Applikation.");
-    }
-    else{ // Falls die JSON Datei noch nicht exisiert.
-        
-    var requestUrl = 'http://makeup-api.herokuapp.com/api/v1/products.json' // Make Up API
-    request.get(requestUrl, function(error,response,body){ // API Request
+        else{ // Falls die Produktliste nicht gefüllt ist, sollen die Produkte aus der API geholt werden und dann in die Produktliste eingetragen werden.
+            var requestUrl = 'http://makeup-api.herokuapp.com/api/v1/products.json' // Make Up API
+            request.get(requestUrl, function(error,response,body){ // API Request
                 var responseBody = JSON.parse(body); // Inhalt den die API liefert.
                 var productList;
         
                 createProductObject(responseBody);
         
-                res.status(201).send("Daten erfolgreich initialisiert"); 
+                res.status(200).send(responseBody); 
         
-        });
+            });
+        }
+       }
+    else{
+        res.status(404).send("Es wurden keine Produkte gefunden.");
     }
+     
 });
 
 // products/:id (GET)
